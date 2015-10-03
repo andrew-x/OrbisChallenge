@@ -8,7 +8,7 @@ public class PlayerAI extends ClientAI {
 
 	@Override
 	public Move getMove(Gameboard gameboard, Opponent opponent, Player player) throws NoItemException, MapOutOfBoundsException {
-		System.out.println("Hello World");
+		
 		//Write your AI here
 		return Move.NONE;
 	}
