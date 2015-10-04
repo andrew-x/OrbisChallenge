@@ -479,6 +479,7 @@ public class PlayerAI extends ClientAI {
                     }
                 }
             }
+        }
     }
 
     private Values getDownValue(Gameboard gameboard) {
@@ -592,30 +593,6 @@ public class PlayerAI extends ClientAI {
             Powerups = new Values();
         }
         }
-    }
-
-    private boolean isInTurretRange(Gameboard gameboard, int x, int y) {
-
-        boolean isInRange = false;
-        ArrayList<Turret> turrets = gameboard.getTurrets();
-        int size = turrets.size();
-
-        for (int i = 0; i < size; i++) {
-            int turretX = turrets.get(i).getX();
-            int turretY = turrets.get(i).getY();
-
-            if (x == turretX || y == turretY) {
-                if ((Math.abs(turretX - x) < 5) || (Math.abs(turretY - y) <
-                        5)) {
-                    if (turrets.get(i).isFiringNextTurn()) {
-                        isInRange = true;
-                    }
-                }
-            }
-        }
-
-        return isInRange;
-
     }
 
     private static class Laser extends GameObjects {
