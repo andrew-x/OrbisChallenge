@@ -70,6 +70,7 @@ public class PlayerAI extends ClientAI {
             downModifier = 0.5;
         }
 
+        System.out.println("left: " + leftVal.getAbsSum(leftModifier) + " right: " + rightVal.getAbsSum(rightModifier) + " up " +  upVal.getAbsSum(upModifier) + " down " + downVal.getAbsSum(downModifier));
         if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)) {
             val = leftVal;
             direction = 4;
@@ -83,6 +84,8 @@ public class PlayerAI extends ClientAI {
             val = downVal;
             direction = 3;
         }
+
+
 
         if (curr_direction == direction) {
             switch (val.getAction()) {
@@ -156,12 +159,14 @@ public class PlayerAI extends ClientAI {
                 rightFile.add(rightObjects.get(0));
             } else {
                 for (int i = 0; i < rightObjects.size(); i++) {
-                    if ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
+                    if (rightObjects.get(i) instanceof Player){
+                        rightFile.add(rightObjects.get(i));
+                    } else if ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
                             rightObjects.get(i)).getDirection() ==
                             Direction.LEFT) {
                         rightFile.add(rightObjects.get(i));
                         break;
-                    } else if (rightObjects.get(i) instanceof Combatant) {
+                    } else if (rightObjects.get(i) instanceof Opponent) {
                         rightFile.add(rightObjects.get(i));
                         break;
                     } else if (isInTurretRange(gameboard, x, startY)) {
@@ -197,12 +202,14 @@ public class PlayerAI extends ClientAI {
                 leftFile.add(leftObjects.get(0));
             } else {
                 for (int i = 0; i < leftObjects.size(); i++) {
-                    if ((leftObjects.get(i) instanceof Bullet) && ((Bullet)
+                    if (leftObjects.get(i) instanceof Player){
+                        rightFile.add(leftObjects.get(i));
+                    } else if ((leftObjects.get(i) instanceof Bullet) && ((Bullet)
                             leftObjects.get(i)).getDirection() ==
                             Direction.RIGHT) {
                         leftFile.add(leftObjects.get(i));
                         break;
-                    } else if (leftObjects.get(i) instanceof Combatant) {
+                    } else if (leftObjects.get(i) instanceof Opponent) {
                         leftFile.add(leftObjects.get(i));
                         break;
                     } else if (isInTurretRange(gameboard, x, startY)) {
@@ -239,12 +246,14 @@ public class PlayerAI extends ClientAI {
                 upFile.add(upObjects.get(0));
             } else {
                 for (int i = 0; i < upObjects.size(); i++) {
-                    if ((upObjects.get(i) instanceof Bullet) && ((Bullet)
+                    if (upObjects.get(i) instanceof Player){
+                        rightFile.add(upObjects.get(i));
+                    } else if ((upObjects.get(i) instanceof Bullet) && ((Bullet)
                             upObjects.get(i)).getDirection() ==
                             Direction.DOWN) {
                         upFile.add(upObjects.get(i));
                         break;
-                    } else if (upObjects.get(i) instanceof Combatant) {
+                    } else if (upObjects.get(i) instanceof Opponent) {
                         upFile.add(upObjects.get(i));
                         break;
                     } else if (isInTurretRange(gameboard, startX, y)) {
@@ -281,12 +290,14 @@ public class PlayerAI extends ClientAI {
                 downFile.add(downObjects.get(0));
             } else {
                 for (int i = 0; i < downObjects.size(); i++) {
-                    if ((downObjects.get(i) instanceof Bullet) && ((Bullet)
+                    if (downObjects.get(i) instanceof Player){
+                        rightFile.add(downObjects.get(i));
+                    } else if ((downObjects.get(i) instanceof Bullet) && ((Bullet)
                             downObjects.get(i)).getDirection() ==
                             Direction.UP) {
                         downFile.add(downObjects.get(i));
                         break;
-                    } else if (downObjects.get(i) instanceof Combatant) {
+                    } else if (downObjects.get(i) instanceof Opponent) {
                         downFile.add(downObjects.get(i));
                         break;
                     } else if (isInTurretRange(gameboard, startX, y)) {
@@ -343,60 +354,75 @@ public class PlayerAI extends ClientAI {
             GameObjects go = file.get(i);
             if (go != null) {
                 if (go instanceof Wall) {
+                    System.out.println("Wall");
                     approach += memory.Walls.approach;
                     attack += memory.Walls.attack;
                     avoid += memory.Walls.avoid;
                 } else if (go instanceof Bullet) {
                     if (((Bullet) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
+                        System.out.println("BulletApr");
                         approach += memory.BulletAppr.approach;
                         attack += memory.BulletAppr.attack;
                         avoid += memory.BulletAppr.avoid;
                     } else if (((Bullet) go).getDirection().equals(player.getDirection())) {
+                        System.out.println("BulletAway");
                         approach += memory.BulletAway.approach;
                         attack += memory.BulletAway.attack;
                         avoid += memory.BulletAway.avoid;
                     } else {
+                        System.out.println("BulletNeut");
                         approach += memory.BulletNeut.approach;
                         attack += memory.BulletNeut.attack;
                         avoid += memory.BulletNeut.avoid;
                     }
                 } else if (go instanceof Laser) {
+                    System.out.println("Laser");
                     approach += memory.Laser.approach;
                     attack += memory.Laser.attack;
                     avoid += memory.Laser.avoid;
                 } else if (go instanceof Turret) {
                     if (Math.abs(((Turret) go).getX() - player.getX()) < 5 || Math.abs(((Turret) go).getY() - player.getY()) < 5) {
+                        System.out.println("Turrets In");
                         approach += memory.TurretsIn.approach;
                         attack += memory.TurretsIn.attack;
                         avoid += memory.TurretsIn.avoid;
                     } else {
+                        System.out.println("Turrets Out");
                         approach += memory.TurretsOut.approach;
                         attack += memory.TurretsOut.attack;
                         avoid += memory.TurretsOut.avoid;
                     }
                 } else if (go instanceof PowerUp) {
+                    System.out.println("Powerup");
                     approach += memory.Powerups.approach;
                     attack += memory.Powerups.attack;
                     avoid += memory.Powerups.avoid;
-                } else if (go instanceof Combatant) {
-                    if (((Combatant) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
+                } else if (go instanceof Opponent) {
+                    if (((Opponent) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
+                        System.out.println("OppApr");
                         approach += memory.OppAppr.approach;
                         attack += memory.OppAppr.attack;
                         avoid += memory.OppAppr.avoid;
-                    } else if (((Combatant) go).getDirection().equals(player.getDirection())) {
+                    } else if (((Opponent) go).getDirection().equals(player.getDirection())) {
+                        System.out.println("OppAway");
                         approach += memory.OppAway.approach;
                         attack += memory.OppAway.attack;
                         avoid += memory.OppAway.avoid;
                     } else {
+                        System.out.println("OppNeut");
                         approach += memory.OppNeut.approach;
                         attack += memory.OppNeut.attack;
                         avoid += memory.OppNeut.avoid;
                     }
 
-                    if (((Combatant)go).isShieldActive()){
+                    if (((Opponent)go).isShieldActive()){
                         avoid += 0.5;
                     }
                 }
+            } else {
+                approach += memory.space.approach;
+                attack += memory.space.attack;
+                avoid += memory.space.avoid;
             }
         }
         val.approach = approach;
@@ -483,6 +509,7 @@ public class PlayerAI extends ClientAI {
         public Values OppAppr;
         public Values OppAway;
         public Values OppNeut;
+        public Values space;
 
         public Memory() {
             Walls = new Values(0, 1, 0);
@@ -496,6 +523,7 @@ public class PlayerAI extends ClientAI {
             OppAppr = new Values(1, 3, 5);
             OppAway = new Values(3, 2, 5);
             OppNeut = new Values(3, 1, 5);
+            space = new Values(0.5, 0, 0);
         }
     }
 }
