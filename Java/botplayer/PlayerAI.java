@@ -131,9 +131,93 @@ public class PlayerAI extends ClientAI {
         curr_direction = 0;
     }
 
-    private void populateFiles(Gameboard gameboard){
-        int startX = 0;
-        int startY = 0;
+    private void populateFiles(Gameboard gameboard, Player player) {
+        int startX = player.getX();
+        int startY = player.getY();
+
+
+        for (int x = startX; x < gameboard.getWidth(); x++) {
+
+            ArrayList<GameObjects> rightObjects = gameboard.getGameObjectsAtTile
+                    (x, startY);
+
+            if (rightObjects.get(0) instanceof Wall) {
+                break;
+            } else if (rightObjects.isEmpty()) {
+                rightFile.add(null);
+            } else if (rightObjects.size() == 1) {
+                rightFile.add(rightObjects.get(0));
+            } else {
+                for (int i = 0; i < rightObjects.size(); i++) {
+                    if ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
+                            rightObjects.get(i)).getDirection() ==
+                            Direction.LEFT) {
+                        rightFile.add(rightObjects.get(i));
+                        break;
+                    } else if (rightObjects.get(i) instanceof Combatant) {
+                        rightFile.add(rightObjects.get(i));
+                        break;
+                    } else if (isInTurretRange(gameboard, x, startY)) {
+                        rightFile.add(new Laser());
+                    } else if (((rightObjects.get(i) instanceof Bullet) && (
+                            (Bullet)
+                            rightObjects.get(i)).getDirection() ==
+                            Direction.UP) || ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
+                            rightObjects.get(i)).getDirection() ==
+                            Direction.DOWN)) {
+                        rightFile.add(rightObjects.get(i));
+                        break;
+                    } else if ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
+                            rightObjects.get(i)).getDirection() ==
+                            Direction.RIGHT) {
+                        rightFile.add(rightObjects.get(i));
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        for (int x = startX; x >= 0; x--) {
+
+            ArrayList<GameObjects> leftObjects = gameboard.getGameObjectsAtTile
+                    (x, startY);
+
+            if (leftObjects.get(0) instanceof Wall) {
+                break;
+            } else if (leftObjects.isEmpty()) {
+                leftFile.add(null);
+            } else if (leftObjects.size() == 1) {
+                leftFile.add(leftObjects.get(0));
+            } else {
+                for (int i = 0; i < leftObjects.size(); i++) {
+                    if ((leftObjects.get(i) instanceof Bullet) && ((Bullet)
+                            leftObjects.get(i)).getDirection() ==
+                            Direction.RIGHT) {
+                        leftFile.add(leftObjects.get(i));
+                        break;
+                    } else if (leftObjects.get(i) instanceof Combatant) {
+                        leftFile.add(leftObjects.get(i));
+                        break;
+                    } else if (isInTurretRange(gameboard, x, startY)) {
+                        leftFile.add(new Laser());
+                    } else if (((leftObjects.get(i) instanceof Bullet) && (
+                            (Bullet)
+                                    leftObjects.get(i)).getDirection() ==
+                            Direction.UP) || ((leftObjects.get(i) instanceof
+                            Bullet) && ((Bullet)
+                            leftObjects.get(i)).getDirection() ==
+                            Direction.DOWN)) {
+                        leftFile.add(leftObjects.get(i));
+                        break;
+                    } else if ((leftObjects.get(i) instanceof Bullet) && (
+                            (Bullet)
+                            leftObjects.get(i)).getDirection() ==
+                            Direction.LEFT) {
+                        leftFile.add(leftObjects.get(i));
+                        break;
+                    }
+                }
         for (int i = startX; i < gameboard.getWidth(); i++){
         }
 
@@ -205,6 +289,47 @@ public class PlayerAI extends ClientAI {
             }
         }
         return val;
+
+        for (int y = startY; y >= 0; y--) {
+            ArrayList<GameObjects> upObjects = gameboard.getGameObjectsAtTile
+                    (startX, y);
+
+            if (upObjects.get(0) instanceof Wall) {
+                break;
+            } else if (upObjects.isEmpty()) {
+                upFile.add(null);
+            } else if (upObjects.size() == 1) {
+                upFile.add(upObjects.get(0));
+            } else {
+                for (int i = 0; i < upObjects.size(); i++) {
+                    if ((upObjects.get(i) instanceof Bullet) && ((Bullet)
+                            upObjects.get(i)).getDirection() ==
+                            Direction.DOWN) {
+                        upFile.add(upObjects.get(i));
+                        break;
+                    } else if (upObjects.get(i) instanceof Combatant) {
+                        upFile.add(upObjects.get(i));
+                        break;
+                    } else if (isInTurretRange(gameboard, startX, y)) {
+                        upFile.add(new Laser());
+                    } else if (((upObjects.get(i)
+                            instanceof Bullet) && (
+                            (Bullet)
+                                    upObjects.get(i)).getDirection() ==
+                            Direction.LEFT) || ((upObjects.get(i) instanceof
+                            Bullet) && ((Bullet)
+                            upObjects.get(i)).getDirection() ==
+                            Direction.RIGHT)) {
+                        upFile.add(upObjects.get(i));
+                        break;
+                    } else if ((upObjects.get(i) instanceof Bullet) && ((Bullet)
+                            upObjects.get(i)).getDirection() ==
+                            Direction.UP) {
+                        upFile.add(upObjects.get(i));
+                        break;
+                    }
+                }
+            }
     }
 
     private Values getDownValue(Gameboard gameboard) {
@@ -309,5 +434,40 @@ public class PlayerAI extends ClientAI {
             TurretsOut = new Values();
             Powerups = new Values();
         }
+        }
     }
+
+    private boolean isInTurretRange(Gameboard gameboard, int x, int y) {
+
+        boolean isInRange = false;
+        ArrayList<Turret> turrets = gameboard.getTurrets();
+        int size = turrets.size();
+
+        for (int i = 0; i < size; i++) {
+            int turretX = turrets.get(i).getX();
+            int turretY = turrets.get(i).getY();
+
+            if (x == turretX || y == turretY) {
+                if ((Math.abs(turretX - x) < 5) || (Math.abs(turretY - y) <
+                        5)) {
+                    if (turrets.get(i).isFiringNextTurn()) {
+                        isInRange = true;
+                    }
+                }
+            }
+        }
+
+        return isInRange;
+
+    }
+
+    private static class Laser extends GameObjects {
+
+        public Laser() {
+            super(0, 0);
+        }
+
+    }
+
 }
+
