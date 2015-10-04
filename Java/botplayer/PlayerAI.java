@@ -1,6 +1,7 @@
 import java.io.*;
 import java.lang.Exception;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class PlayerAI extends ClientAI {
     private static String filepath;
@@ -49,8 +50,15 @@ public class PlayerAI extends ClientAI {
         populateFiles(gameboard, player);
         leftVal = getValues(gameboard, player, leftFile);
         System.out.println("left: " + leftVal.approach + " " + leftVal.avoid + " " + leftVal.attack + " | size: " + leftFile.size());
+
         rightVal = getValues(gameboard, player, rightFile);
         System.out.println("right: " + rightVal.approach + " " + rightVal.avoid + " " +  rightVal.attack+ " | size: " + rightFile.size());
+        for (int i = 0; i < rightFile.size(); i++) {
+            if (rightFile.get(i) != null){
+                System.out.print(rightFile.get(i).toString() + " ");
+            }
+
+        }
         upVal = getValues(gameboard, player, upFile);
         System.out.println("up: " + upVal.approach + " " + upVal.avoid + " " +  upVal.attack+ " | size: " + upFile.size());
         downVal = getValues(gameboard, player, downFile);
@@ -58,31 +66,31 @@ public class PlayerAI extends ClientAI {
 
         if (player.getDirection().equals(Direction.LEFT)) {
             curr_direction = 4;
-            leftModifier = 0.5;
+            leftModifier = 0.25;
         } else if (player.getDirection().equals(Direction.RIGHT)) {
             curr_direction = 2;
-            rightModifier = 0.5;
+            rightModifier = 0.25;
         } else if (player.getDirection().equals(Direction.UP)) {
             curr_direction = 1;
-            upModifier = 0.5;
+            upModifier = 0.25;
         } else if (player.getDirection().equals(Direction.DOWN)) {
             curr_direction = 3;
-            downModifier = 0.5;
+            downModifier = 0.25;
         }
 
         int centerX = gameboard.getWidth() / 2;
         int centerY = gameboard.getHeight() / 2;
         if (centerX > player.x){
-            rightModifier += 0.5;
+            rightModifier += 0.20;
         } else if (centerX < player.x){
-            leftModifier += 0.5;
+            leftModifier += 0.20;
         }
         if (centerY > player.y){
-            downModifier += 0.5;
+            downModifier += 0.20;
         } else if (centerY < player.y){
-            upModifier += 0.5;
+            upModifier += 0.20;
         }
-
+        System.out.println("Right: " + rightModifier);
         System.out.println("left: " + leftVal.getAbsSum(leftModifier) + " right: " + rightVal.getAbsSum(rightModifier) + " up " +  upVal.getAbsSum(upModifier) + " down " + downVal.getAbsSum(downModifier));
         if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)) {
             val = leftVal;
@@ -96,6 +104,72 @@ public class PlayerAI extends ClientAI {
         } else if (downVal.getAbsSum(downModifier) > leftVal.getAbsSum(leftModifier) && downVal.getAbsSum(downModifier) > rightVal.getAbsSum(rightModifier) && downVal.getAbsSum(downModifier) > upVal.getAbsSum(upModifier)) {
             val = downVal;
             direction = 3;
+        } else if (leftVal.getAbsSum(leftModifier) == rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)){
+            if (new Random().nextInt(2) == 0){
+                val = leftVal;
+                direction = 4;
+            } else {
+                val = rightVal;
+                direction = 2;
+            }
+        } else if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) == upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)){
+            if (new Random().nextInt(2) == 0){
+                val = leftVal;
+                direction = 4;
+            } else {
+                val = upVal;
+                direction = 1;
+            }
+        } else if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) == downVal.getAbsSum(downModifier)){
+            if (new Random().nextInt(2) == 0){
+                val = leftVal;
+                direction = 4;
+            } else {
+
+            }
+        } else if (rightVal.getAbsSum(rightModifier) > leftVal.getAbsSum(leftModifier) && rightVal.getAbsSum(rightModifier) == upVal.getAbsSum(upModifier) && rightVal.getAbsSum(rightModifier) > downVal.getAbsSum(downModifier)){
+            if (new Random().nextInt(2) == 0){
+                val = rightVal;
+                direction = 2;
+            } else {
+                val = upVal;
+                direction = 1;
+            }
+        } else if (rightVal.getAbsSum(rightModifier) > leftVal.getAbsSum(leftModifier) && rightVal.getAbsSum(rightModifier) > upVal.getAbsSum(upModifier) && rightVal.getAbsSum(rightModifier) == downVal.getAbsSum(downModifier)){
+            if (new Random().nextInt(2) == 0){
+                val = rightVal;
+                direction = 2;
+            } else {
+
+            }
+        } else if (upVal.getAbsSum(upModifier) > leftVal.getAbsSum(leftModifier) && upVal.getAbsSum(upModifier) > rightVal.getAbsSum(rightModifier) && upVal.getAbsSum(upModifier) == downVal.getAbsSum(downModifier)) {
+            if (new Random().nextInt(2) == 0){
+                val = upVal;
+                direction = 1;
+            } else {
+
+            }
+        } else {
+            int random = new Random().nextInt(4);
+            if (random == 0){
+                val = leftVal;
+                direction = 4;
+            } else if (random == 1){
+                val = rightVal;
+                direction = 2;
+            } else if (random == 2){
+                val = upVal;
+                direction = 1;
+            } else {
+                val = downVal;
+                direction = 3;
+            }
+        }
+
+
+
+        if (oppInRange(player, opponent) && player.getLaserCount() > 0){
+            return Move.LASER;
         }
 
         if (val.getAction() == 2){
@@ -116,9 +190,42 @@ public class PlayerAI extends ClientAI {
                             } else {
                                 if (leftFile.size() > rightFile.size()){
                                     return Move.FACE_LEFT;
-                                } else {
+                                } else if (leftFile.size() < rightFile.size()){
                                     return Move.FACE_RIGHT;
-                                } // else you're kinda fucked.
+                                } else {
+                                    if (leftFile.size() < 2 && rightFile.size() < 2){
+                                        if (player.getShieldCount() > 0 && !player.isShieldActive()){
+                                            return Move.SHIELD;
+                                        }
+                                        if (player.getTeleportCount() > 0 && gameboard.getTeleportLocations().size() > 0){
+                                            int teleportLoc = new Random().nextInt((gameboard.getTeleportLocations().size() + 1));
+                                            switch (teleportLoc){
+                                                case 0:
+                                                    return Move.TELEPORT_0;
+                                                case 1:
+                                                    return Move.TELEPORT_1;
+                                                case 2:
+                                                    return Move.TELEPORT_2;
+                                                case 3:
+                                                    return Move.TELEPORT_3;
+                                                case 4:
+                                                    return Move.TELEPORT_4;
+                                                case 5:
+                                                    return Move.TELEPORT_5;
+                                                default:
+                                                    return Move.FACE_DOWN;
+                                            }
+                                        }
+                                        // Take it like a man.
+                                        return Move.FACE_DOWN;
+                                    } else {
+                                        if (rightModifier > leftModifier){
+                                            return Move.FACE_RIGHT;
+                                        } else {
+                                            return Move.FACE_LEFT;
+                                        }
+                                    }
+                                }
                             }
                         case 4:
                             if (upFile.size() > 1){
@@ -150,9 +257,42 @@ public class PlayerAI extends ClientAI {
                             } else {
                                 if (upFile.size() > downFile.size()){
                                     return Move.FACE_UP;
-                                } else {
+                                } else if (upFile.size() < downFile.size()){
                                     return Move.FACE_DOWN;
-                                } // else you're kinda fucked.
+                                } else {
+                                    if (upFile.size() < 2 && downFile.size() < 2){
+                                        if (player.getShieldCount() > 0 && !player.isShieldActive()){
+                                            return Move.SHIELD;
+                                        }
+                                        if (player.getTeleportCount() > 0 && gameboard.getTeleportLocations().size() > 0){
+                                            int teleportLoc = new Random().nextInt((gameboard.getTeleportLocations().size() + 1));
+                                            switch (teleportLoc){
+                                                case 0:
+                                                    return Move.TELEPORT_0;
+                                                case 1:
+                                                    return Move.TELEPORT_1;
+                                                case 2:
+                                                    return Move.TELEPORT_2;
+                                                case 3:
+                                                    return Move.TELEPORT_3;
+                                                case 4:
+                                                    return Move.TELEPORT_4;
+                                                case 5:
+                                                    return Move.TELEPORT_5;
+                                                default:
+                                                    return Move.FACE_LEFT;
+                                            }
+                                        }
+                                        // Take it like a man.
+                                        return Move.FACE_LEFT;
+                                    } else {
+                                        if (upModifier > downModifier){
+                                            return Move.FACE_UP;
+                                        } else {
+                                            return Move.FACE_DOWN;
+                                        }
+                                    }
+                                }
                             }
                     }
                     break;
@@ -164,9 +304,42 @@ public class PlayerAI extends ClientAI {
                             } else {
                                 if (leftFile.size() > rightFile.size()){
                                     return Move.FACE_LEFT;
-                                } else {
+                                } else if (leftFile.size() < rightFile.size()) {
                                     return Move.FACE_RIGHT;
-                                } // else you're kinda fucked.
+                                } else {
+                                    if (leftFile.size() < 2 && rightFile.size() < 2){
+                                        if (player.getShieldCount() > 0 && !player.isShieldActive()){
+                                            return Move.SHIELD;
+                                        }
+                                        if (player.getTeleportCount() > 0 && gameboard.getTeleportLocations().size() > 0){
+                                            int teleportLoc = new Random().nextInt((gameboard.getTeleportLocations().size() + 1));
+                                            switch (teleportLoc){
+                                                case 0:
+                                                    return Move.TELEPORT_0;
+                                                case 1:
+                                                    return Move.TELEPORT_1;
+                                                case 2:
+                                                    return Move.TELEPORT_2;
+                                                case 3:
+                                                    return Move.TELEPORT_3;
+                                                case 4:
+                                                    return Move.TELEPORT_4;
+                                                case 5:
+                                                    return Move.TELEPORT_5;
+                                                default:
+                                                    return Move.FACE_UP;
+                                            }
+                                        }
+                                        // Take it like a man.
+                                        return Move.FACE_UP;
+                                    } else {
+                                        if (rightModifier > leftModifier){
+                                            return Move.FACE_RIGHT;
+                                        } else {
+                                            return Move.FACE_LEFT;
+                                        }
+                                    }
+                                }
                             }
                         case 2:
                             if (downFile.size() > 1){
@@ -198,9 +371,42 @@ public class PlayerAI extends ClientAI {
                             } else {
                                 if (upFile.size() > downFile.size()){
                                     return Move.FACE_UP;
-                                } else {
+                                } else if (upFile.size() < downFile.size()){
                                     return Move.FACE_DOWN;
-                                } // else you're kinda fucked.
+                                } else {
+                                    if (upFile.size() < 2 && downFile.size() < 2){
+                                        if (player.getShieldCount() > 0 && !player.isShieldActive()){
+                                            return Move.SHIELD;
+                                        }
+                                        if (player.getTeleportCount() > 0 && gameboard.getTeleportLocations().size() > 0){
+                                            int teleportLoc = new Random().nextInt((gameboard.getTeleportLocations().size() + 1));
+                                            switch (teleportLoc){
+                                                case 0:
+                                                    return Move.TELEPORT_0;
+                                                case 1:
+                                                    return Move.TELEPORT_1;
+                                                case 2:
+                                                    return Move.TELEPORT_2;
+                                                case 3:
+                                                    return Move.TELEPORT_3;
+                                                case 4:
+                                                    return Move.TELEPORT_4;
+                                                case 5:
+                                                    return Move.TELEPORT_5;
+                                                default:
+                                                    return Move.FACE_RIGHT;
+                                            }
+                                        }
+                                        // Take it like a man.
+                                        return Move.FACE_RIGHT;
+                                    } else {
+                                        if (upModifier > downModifier){
+                                            return Move.FACE_UP;
+                                        } else {
+                                            return Move.FACE_DOWN;
+                                        }
+                                    }
+                                }
                             }
 
                         case 3:
@@ -218,19 +424,8 @@ public class PlayerAI extends ClientAI {
             switch (val.getAction()) {
                 case 1:
                     return Move.SHOOT;
-                case 2:
-                    switch (curr_direction) {
-                        case 1:
-                            return Move.FACE_DOWN;
-                        case 2:
-                            return Move.FACE_LEFT;
-                        case 3:
-                            return Move.FACE_UP;
-                        case 4:
-                            return Move.FACE_RIGHT;
-                    }
-                    break;
                 case 3:
+
                     return Move.FORWARD;
             }
         } else {
@@ -269,21 +464,40 @@ public class PlayerAI extends ClientAI {
         curr_direction = 0;
     }
 
+    private boolean oppInRange(Player player, Opponent opp){
+        if (player.x == opp.x && Math.abs(player.y - opp.y) < 5){
+            return true;
+        } else if (player.y == opp.y && Math.abs(player.x - opp.x) < 5){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void populateFiles(Gameboard gameboard, Player player) {
         int startX = player.getX();
         int startY = player.getY();
-
 
         for (int x = startX; x < gameboard.getWidth(); x++) {
 
             ArrayList<GameObjects> rightObjects = gameboard.getGameObjectsAtTile
                     (x, startY);
+
             if (rightObjects.isEmpty()) {
-                rightFile.add(null);
+                if (isInTurretRange(gameboard, x, startY)){
+                    rightFile.add(new Laser());
+                } else {
+                    rightFile.add(null);
+                }
             } else if (rightObjects.get(0) instanceof Wall) {
                 break;
             } else if (rightObjects.size() == 1) {
-                rightFile.add(rightObjects.get(0));
+                if (isInTurretRange(gameboard, x, startY)){
+                    rightFile.add(new Laser());
+                } else {
+                    rightFile.add(rightObjects.get(0));
+                }
+
             } else {
                 for (int i = 0; i < rightObjects.size(); i++) {
                     if (rightObjects.get(i) instanceof Player){
@@ -298,6 +512,7 @@ public class PlayerAI extends ClientAI {
                         break;
                     } else if (isInTurretRange(gameboard, x, startY)) {
                         rightFile.add(new Laser());
+                        break;
                     } else if (((rightObjects.get(i) instanceof Bullet) && (
                             (Bullet)
                                     rightObjects.get(i)).getDirection() ==
@@ -306,6 +521,8 @@ public class PlayerAI extends ClientAI {
                             Direction.DOWN)) {
                         rightFile.add(rightObjects.get(i));
                         break;
+                    } else if (rightObjects.get(0) instanceof PowerUp){
+                        rightFile.add(new PowerUp(0, 0, PowerUpType.LASER));
                     } else if ((rightObjects.get(i) instanceof Bullet) && ((Bullet)
                             rightObjects.get(i)).getDirection() ==
                             Direction.RIGHT) {
@@ -322,11 +539,21 @@ public class PlayerAI extends ClientAI {
                     (x, startY);
 
             if (leftObjects.isEmpty()) {
-                leftFile.add(null);
+                if (isInTurretRange(gameboard, x, startY)){
+                    leftFile.add(new Laser());
+                } else {
+                    leftFile.add(null);
+                }
+
             } else if (leftObjects.get(0) instanceof Wall) {
                 break;
             } else if (leftObjects.size() == 1) {
-                leftFile.add(leftObjects.get(0));
+                if (isInTurretRange(gameboard, x, startY)){
+                    leftFile.add(new Laser());
+                } else {
+                    leftFile.add(leftObjects.get(0));
+                }
+
             } else {
                 for (int i = 0; i < leftObjects.size(); i++) {
                     if (leftObjects.get(i) instanceof Player){
@@ -341,6 +568,7 @@ public class PlayerAI extends ClientAI {
                         break;
                     } else if (isInTurretRange(gameboard, x, startY)) {
                         leftFile.add(new Laser());
+                        break;
                     } else if (((leftObjects.get(i) instanceof Bullet) && (
                             (Bullet)
                                     leftObjects.get(i)).getDirection() ==
@@ -350,6 +578,8 @@ public class PlayerAI extends ClientAI {
                             Direction.DOWN)) {
                         leftFile.add(leftObjects.get(i));
                         break;
+                    } else if (leftObjects.get(0) instanceof PowerUp){
+                        rightFile.add(new PowerUp(0, 0, PowerUpType.LASER));
                     } else if ((leftObjects.get(i) instanceof Bullet) && (
                             (Bullet)
                                     leftObjects.get(i)).getDirection() ==
@@ -366,11 +596,21 @@ public class PlayerAI extends ClientAI {
                     (startX, y);
 
             if (upObjects.isEmpty()) {
-                upFile.add(null);
+                if (isInTurretRange(gameboard, startX, y)){
+                    upFile.add(new Laser());
+                } else {
+                    upFile.add(null);
+                }
+
             } else if (upObjects.get(0) instanceof Wall) {
                 break;
             } else if (upObjects.size() == 1) {
-                upFile.add(upObjects.get(0));
+                if (isInTurretRange(gameboard, startX, y)){
+                    upFile.add(new Laser());
+                } else {
+                    upFile.add(upObjects.get(0));
+                }
+
             } else {
                 for (int i = 0; i < upObjects.size(); i++) {
                     if (upObjects.get(i) instanceof Player){
@@ -385,6 +625,7 @@ public class PlayerAI extends ClientAI {
                         break;
                     } else if (isInTurretRange(gameboard, startX, y)) {
                         upFile.add(new Laser());
+                        break;
                     } else if (((upObjects.get(i)
                             instanceof Bullet) && (
                             (Bullet)
@@ -395,6 +636,8 @@ public class PlayerAI extends ClientAI {
                             Direction.RIGHT)) {
                         upFile.add(upObjects.get(i));
                         break;
+                    } else if (upObjects.get(0) instanceof PowerUp){
+                        rightFile.add(new PowerUp(0, 0, PowerUpType.LASER));
                     } else if ((upObjects.get(i) instanceof Bullet) && ((Bullet)
                             upObjects.get(i)).getDirection() ==
                             Direction.UP) {
@@ -410,11 +653,20 @@ public class PlayerAI extends ClientAI {
                     (startX, y);
 
             if (downObjects.isEmpty()) {
-                downFile.add(null);
+                if (isInTurretRange(gameboard, startX, y)){
+                    downFile.add(new Laser());
+                } else {
+                    downFile.add(null);
+                }
+
             } else if (downObjects.get(0) instanceof Wall) {
                 break;
             } else if (downObjects.size() == 1) {
-                downFile.add(downObjects.get(0));
+                if (isInTurretRange(gameboard, startX, y)){
+                    downFile.add(new Laser());
+                } else {
+                    downFile.add(downObjects.get(0));
+                }
             } else {
                 for (int i = 0; i < downObjects.size(); i++) {
                     if (downObjects.get(i) instanceof Player){
@@ -429,6 +681,7 @@ public class PlayerAI extends ClientAI {
                         break;
                     } else if (isInTurretRange(gameboard, startX, y)) {
                         downFile.add(new Laser());
+                        break;
                     } else if (((downObjects.get(i) instanceof Bullet) && (
                             (Bullet) downObjects.get(i)).getDirection() ==
                             Direction.LEFT) || ((downObjects.get(i)
@@ -437,6 +690,8 @@ public class PlayerAI extends ClientAI {
                             Direction.RIGHT)) {
                         downFile.add(downObjects.get(i));
                         break;
+                    } else if (downObjects.get(i) instanceof PowerUp){
+                        rightFile.add(new PowerUp(0, 0, PowerUpType.LASER));
                     } else if ((downObjects.get(i) instanceof Bullet) && (
                             (Bullet) downObjects.get(i)).getDirection() ==
                             Direction.DOWN) {
@@ -449,7 +704,6 @@ public class PlayerAI extends ClientAI {
     }
 
     private boolean isInTurretRange(Gameboard gameboard, int x, int y) {
-
         boolean isInRange = false;
         ArrayList<Turret> turrets = gameboard.getTurrets();
         int size = turrets.size();
@@ -467,9 +721,7 @@ public class PlayerAI extends ClientAI {
                 }
             }
         }
-
         return isInRange;
-
     }
 
     private Values getValues(Gameboard gameboard, Player player, ArrayList<GameObjects> file) {
@@ -482,68 +734,68 @@ public class PlayerAI extends ClientAI {
             if (go != null) {
                 if (go instanceof Wall) {
                     System.out.println("Wall");
-                    approach += memory.Walls.approach;
-                    attack += memory.Walls.attack;
-                    avoid += memory.Walls.avoid;
+                    approach += memory.Walls.approach / ((i+1)*2);
+                    attack += memory.Walls.attack / ((i+1)*2);
+                    avoid += memory.Walls.avoid / ((i+1)*2);
                 } else if (go instanceof Bullet) {
                     if (((Bullet) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
                         System.out.println("BulletApr");
-                        approach += memory.BulletAppr.approach;
-                        attack += memory.BulletAppr.attack;
-                        avoid += memory.BulletAppr.avoid;
+                        approach += memory.BulletAppr.approach / ((i+1)*2);
+                        attack += memory.BulletAppr.attack / ((i+1)*2);
+                        avoid += memory.BulletAppr.avoid / ((i+1)*2);
                     } else if (((Bullet) go).getDirection().equals(player.getDirection())) {
                         System.out.println("BulletAway");
-                        approach += memory.BulletAway.approach;
-                        attack += memory.BulletAway.attack;
-                        avoid += memory.BulletAway.avoid;
+                        approach += memory.BulletAway.approach / ((i+1)*2);
+                        attack += memory.BulletAway.attack / ((i+1)*2);
+                        avoid += memory.BulletAway.avoid / ((i+1)*2);
                     } else {
                         System.out.println("BulletNeut");
-                        approach += memory.BulletNeut.approach;
-                        attack += memory.BulletNeut.attack;
-                        avoid += memory.BulletNeut.avoid;
+                        approach += memory.BulletNeut.approach / ((i+1)*2);
+                        attack += memory.BulletNeut.attack / ((i+1)*2);
+                        avoid += memory.BulletNeut.avoid / ((i+1)*2);
                     }
                 } else if (go instanceof Laser) {
                     System.out.println("Laser");
-                    approach += memory.Laser.approach;
-                    attack += memory.Laser.attack;
-                    avoid += memory.Laser.avoid;
+                    approach += memory.Laser.approach / ((i+1)*2);
+                    attack += memory.Laser.attack / ((i+1)*2);
+                    avoid += memory.Laser.avoid / ((i+1)*2);
                 } else if (go instanceof Turret) {
                     if (i < 5) {
                         System.out.println("Turrets In");
-                        approach += memory.TurretsIn.approach;
-                        attack += memory.TurretsIn.attack;
-                        avoid += memory.TurretsIn.avoid;
+                        approach += memory.TurretsIn.approach / ((i+1)*2);
+                        attack += memory.TurretsIn.attack / ((i+1)*2);
+                        avoid += memory.TurretsIn.avoid / ((i+1)*2);
                     } else {
                         System.out.println("Turrets Out");
-                        approach += memory.TurretsOut.approach;
-                        attack += memory.TurretsOut.attack;
-                        avoid += memory.TurretsOut.avoid;
+                        approach += memory.TurretsOut.approach / ((i+1)*2);
+                        attack += memory.TurretsOut.attack / ((i+1)*2);
+                        avoid += memory.TurretsOut.avoid / ((i+1)*2);
                     }
                 } else if (go instanceof PowerUp) {
                     System.out.println("Powerup");
-                    approach += memory.Powerups.approach;
-                    attack += memory.Powerups.attack;
-                    avoid += memory.Powerups.avoid;
+                    approach += memory.Powerups.approach / ((i+1)*2);
+                    attack += memory.Powerups.attack / ((i+1)*2);
+                    avoid += memory.Powerups.avoid / ((i+1)*2);
                 } else if (go instanceof Opponent) {
                     if (((Opponent) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
                         System.out.println("OppApr");
-                        approach += memory.OppAppr.approach;
-                        attack += memory.OppAppr.attack;
-                        avoid += memory.OppAppr.avoid;
+                        approach += memory.OppAppr.approach / ((i+1)*2);
+                        attack += memory.OppAppr.attack / ((i+1)*2);
+                        avoid += memory.OppAppr.avoid / ((i+1)*2);
                     } else if (((Opponent) go).getDirection().equals(player.getDirection())) {
                         System.out.println("OppAway");
-                        approach += memory.OppAway.approach;
-                        attack += memory.OppAway.attack;
-                        avoid += memory.OppAway.avoid;
+                        approach += memory.OppAway.approach / ((i+1)*2);
+                        attack += memory.OppAway.attack / ((i+1)*2);
+                        avoid += memory.OppAway.avoid / ((i+1)*2);
                     } else {
                         System.out.println("OppNeut");
-                        approach += memory.OppNeut.approach;
-                        attack += memory.OppNeut.attack;
-                        avoid += memory.OppNeut.avoid;
+                        approach += memory.OppNeut.approach / ((i+1)*2);
+                        attack += memory.OppNeut.attack / ((i+1)*2);
+                        avoid += memory.OppNeut.avoid / ((i+1)*2);
                     }
 
                     if (((Opponent)go).isShieldActive()){
-                        avoid += 0.5;
+                        avoid += 0.5 / ((i+1)*2);
                     }
                 }
             } else {
@@ -559,11 +811,9 @@ public class PlayerAI extends ClientAI {
     }
 
     private static class Laser extends GameObjects {
-
         public Laser() {
             super(0, 0);
         }
-
     }
 
     public static class Values implements Serializable {
@@ -639,18 +889,18 @@ public class PlayerAI extends ClientAI {
         public Values space;
 
         public Memory() {
-            Walls = new Values(0, 1, 0);
-            BulletAppr = new Values(0, 4, 0);
+            Walls = new Values(0, 0, 0);
+            BulletAppr = new Values(0, 5, 0);
             BulletAway = new Values(3, 2, 0);
             BulletNeut = new Values(2, 3, 0);
-            Laser = new Values(0, 5, 0);
+            Laser = new Values(0, 3, 0);
             TurretsIn = new Values(0, 5, 2);
-            TurretsOut = new Values(3, 2, 4);
+            TurretsOut = new Values(0, 2, 5);
             Powerups = new Values(5, 0, 0);
-            OppAppr = new Values(1, 3, 5);
+            OppAppr = new Values(1, 5, 4);
             OppAway = new Values(3, 2, 5);
             OppNeut = new Values(3, 1, 5);
-            space = new Values(0.25, 0, 0);
+            space = new Values(0.15, 0, 0);
         }
     }
 }
