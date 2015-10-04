@@ -28,7 +28,7 @@ public class PlayerAI extends ClientAI {
 
     public PlayerAI() {
         memory = new Memory();
-        filepath = PlayerAI.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"/data.dat";
+        filepath = PlayerAI.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "/data.dat";
         //load();
 
         leftFile = new ArrayList<>();
@@ -46,47 +46,50 @@ public class PlayerAI extends ClientAI {
     @Override
     public Move getMove(Gameboard gameboard, Opponent opponent, Player player) throws NoItemException, MapOutOfBoundsException {
         reset();
-        populateFiles(gameboard);
+        populateFiles(gameboard, player);
         leftVal = getValues(gameboard, player, leftFile);
-        rightVal = getRightValue(gameboard);
-        upVal = getUpValue(gameboard);
-        downVal = getDownValue(gameboard);
+        System.out.println("left: " + leftVal.approach + " " + leftVal.avoid + " " + leftVal.attack + " | size: " + leftFile.size());
+        rightVal = getValues(gameboard, player, rightFile);
+        System.out.println("right: " + rightVal.approach + " " + rightVal.avoid + " " +  rightVal.attack+ " | size: " + rightFile.size());
+        upVal = getValues(gameboard, player, upFile);
+        System.out.println("up: " + upVal.approach + " " + upVal.avoid + " " +  upVal.attack+ " | size: " + upFile.size());
+        downVal = getValues(gameboard, player, downFile);
+        System.out.println("down: " + downVal.approach + " " + downVal.avoid + " " +  downVal.attack+ " | size: " + downFile.size());
 
-        if (player.getDirection().equals(Direction.LEFT)){
+        if (player.getDirection().equals(Direction.LEFT)) {
             curr_direction = 4;
             leftModifier = 0.5;
-        } else if (player.getDirection().equals(Direction.RIGHT)){
+        } else if (player.getDirection().equals(Direction.RIGHT)) {
             curr_direction = 2;
             rightModifier = 0.5;
-        } else if (player.getDirection().equals(Direction.UP)){
+        } else if (player.getDirection().equals(Direction.UP)) {
             curr_direction = 1;
             upModifier = 0.5;
-        } else if (player.getDirection().equals(Direction.DOWN)){
+        } else if (player.getDirection().equals(Direction.DOWN)) {
             curr_direction = 3;
             downModifier = 0.5;
         }
 
-        if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)){
+        if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)) {
             val = leftVal;
             direction = 4;
         } else if (rightVal.getAbsSum(rightModifier) > leftVal.getAbsSum(leftModifier) && rightVal.getAbsSum(rightModifier) > upVal.getAbsSum(upModifier) && rightVal.getAbsSum(rightModifier) > downVal.getAbsSum(downModifier)) {
             val = rightVal;
             direction = 2;
-        } else if (upVal.getAbsSum(upModifier) > leftVal.getAbsSum(leftModifier) && upVal.getAbsSum(upModifier) > rightVal.getAbsSum(rightModifier) && upVal.getAbsSum(upModifier) > downVal.getAbsSum(downModifier)){
+        } else if (upVal.getAbsSum(upModifier) > leftVal.getAbsSum(leftModifier) && upVal.getAbsSum(upModifier) > rightVal.getAbsSum(rightModifier) && upVal.getAbsSum(upModifier) > downVal.getAbsSum(downModifier)) {
             val = upVal;
             direction = 1;
-        } else if (downVal.getAbsSum(downModifier) > leftVal.getAbsSum(leftModifier) && downVal.getAbsSum(downModifier) > rightVal.getAbsSum(rightModifier) && downVal.getAbsSum(downModifier) > upVal.getAbsSum(upModifier)){
+        } else if (downVal.getAbsSum(downModifier) > leftVal.getAbsSum(leftModifier) && downVal.getAbsSum(downModifier) > rightVal.getAbsSum(rightModifier) && downVal.getAbsSum(downModifier) > upVal.getAbsSum(upModifier)) {
             val = downVal;
             direction = 3;
         }
 
-        //save();
-        if (curr_direction == direction){
-            switch (val.getAction()){
+        if (curr_direction == direction) {
+            switch (val.getAction()) {
                 case 1:
                     return Move.SHOOT;
                 case 2:
-                    switch (curr_direction){
+                    switch (curr_direction) {
                         case 1:
                             return Move.FACE_DOWN;
                         case 2:
@@ -101,7 +104,7 @@ public class PlayerAI extends ClientAI {
                     return Move.FORWARD;
             }
         } else {
-            switch (direction){
+            switch (direction) {
                 case 1:
                     return Move.FACE_UP;
                 case 2:
@@ -115,7 +118,7 @@ public class PlayerAI extends ClientAI {
         return Move.NONE;
     }
 
-    private void reset(){
+    private void reset() {
         leftModifier = 0;
         rightModifier = 0;
         upModifier = 0;
@@ -126,6 +129,11 @@ public class PlayerAI extends ClientAI {
         rightVal = new Values();
         upVal = new Values();
         downVal = new Values();
+
+        leftFile = new ArrayList<>();
+        rightFile = new ArrayList<>();
+        upFile = new ArrayList<>();
+        downFile = new ArrayList<>();
 
         direction = 0;
         curr_direction = 0;
@@ -140,11 +148,10 @@ public class PlayerAI extends ClientAI {
 
             ArrayList<GameObjects> rightObjects = gameboard.getGameObjectsAtTile
                     (x, startY);
-
-            if (rightObjects.get(0) instanceof Wall) {
-                break;
-            } else if (rightObjects.isEmpty()) {
+            if (rightObjects.isEmpty()) {
                 rightFile.add(null);
+            } else if (rightObjects.get(0) instanceof Wall) {
+                break;
             } else if (rightObjects.size() == 1) {
                 rightFile.add(rightObjects.get(0));
             } else {
@@ -179,14 +186,13 @@ public class PlayerAI extends ClientAI {
         }
 
         for (int x = startX; x >= 0; x--) {
-
             ArrayList<GameObjects> leftObjects = gameboard.getGameObjectsAtTile
                     (x, startY);
 
-            if (leftObjects.get(0) instanceof Wall) {
-                break;
-            } else if (leftObjects.isEmpty()) {
+            if (leftObjects.isEmpty()) {
                 leftFile.add(null);
+            } else if (leftObjects.get(0) instanceof Wall) {
+                break;
             } else if (leftObjects.size() == 1) {
                 leftFile.add(leftObjects.get(0));
             } else {
@@ -225,10 +231,10 @@ public class PlayerAI extends ClientAI {
             ArrayList<GameObjects> upObjects = gameboard.getGameObjectsAtTile
                     (startX, y);
 
-            if (upObjects.get(0) instanceof Wall) {
-                break;
-            } else if (upObjects.isEmpty()) {
+            if (upObjects.isEmpty()) {
                 upFile.add(null);
+            } else if (upObjects.get(0) instanceof Wall) {
+                break;
             } else if (upObjects.size() == 1) {
                 upFile.add(upObjects.get(0));
             } else {
@@ -267,10 +273,10 @@ public class PlayerAI extends ClientAI {
             ArrayList<GameObjects> downObjects = gameboard.getGameObjectsAtTile
                     (startX, y);
 
-            if (downObjects.get(0) instanceof Wall) {
-                break;
-            } else if (downObjects.isEmpty()) {
+            if (downObjects.isEmpty()) {
                 downFile.add(null);
+            } else if (downObjects.get(0) instanceof Wall) {
+                break;
             } else if (downObjects.size() == 1) {
                 downFile.add(downObjects.get(0));
             } else {
@@ -328,7 +334,7 @@ public class PlayerAI extends ClientAI {
 
     }
 
-    private Values getValues(Gameboard gameboard, Player player, ArrayList<GameObjects> file){
+    private Values getValues(Gameboard gameboard, Player player, ArrayList<GameObjects> file) {
         Values val = new Values();
         double approach = 0;
         double attack = 0;
@@ -341,11 +347,11 @@ public class PlayerAI extends ClientAI {
                     attack += memory.Walls.attack;
                     avoid += memory.Walls.avoid;
                 } else if (go instanceof Bullet) {
-                    if (((Bullet)go).getDirection().equals(Direction.opposite(player.getDirection()))){
+                    if (((Bullet) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
                         approach += memory.BulletAppr.approach;
                         attack += memory.BulletAppr.attack;
                         avoid += memory.BulletAppr.avoid;
-                    } else if (((Bullet)go).getDirection().equals(player.getDirection())){
+                    } else if (((Bullet) go).getDirection().equals(player.getDirection())) {
                         approach += memory.BulletAway.approach;
                         attack += memory.BulletAway.attack;
                         avoid += memory.BulletAway.avoid;
@@ -354,8 +360,12 @@ public class PlayerAI extends ClientAI {
                         attack += memory.BulletNeut.attack;
                         avoid += memory.BulletNeut.avoid;
                     }
+                } else if (go instanceof Laser) {
+                    approach += memory.Laser.approach;
+                    attack += memory.Laser.attack;
+                    avoid += memory.Laser.avoid;
                 } else if (go instanceof Turret) {
-                    if (Math.abs(((Turret) go).getX() - player.getX()) < 5 || Math.abs(((Turret) go).getY() - player.getY()) < 5 ){
+                    if (Math.abs(((Turret) go).getX() - player.getX()) < 5 || Math.abs(((Turret) go).getY() - player.getY()) < 5) {
                         approach += memory.TurretsIn.approach;
                         attack += memory.TurretsIn.attack;
                         avoid += memory.TurretsIn.avoid;
@@ -368,64 +378,31 @@ public class PlayerAI extends ClientAI {
                     approach += memory.Powerups.approach;
                     attack += memory.Powerups.attack;
                     avoid += memory.Powerups.avoid;
-                } else if (go instanceof Player) {
+                } else if (go instanceof Combatant) {
+                    if (((Combatant) go).getDirection().equals(Direction.opposite(player.getDirection()))) {
+                        approach += memory.OppAppr.approach;
+                        attack += memory.OppAppr.attack;
+                        avoid += memory.OppAppr.avoid;
+                    } else if (((Combatant) go).getDirection().equals(player.getDirection())) {
+                        approach += memory.OppAway.approach;
+                        attack += memory.OppAway.attack;
+                        avoid += memory.OppAway.avoid;
+                    } else {
+                        approach += memory.OppNeut.approach;
+                        attack += memory.OppNeut.attack;
+                        avoid += memory.OppNeut.avoid;
+                    }
 
+                    if (((Combatant)go).isShieldActive()){
+                        avoid += 0.5;
+                    }
                 }
             }
         }
+        val.approach = approach;
+        val.attack = attack;
+        val.avoid = avoid;
         return val;
-    }
-
-    private Values getRightValue(Gameboard gameboard){
-        Values val = new Values();
-        for (int i = 0; i < rightFile.size(); i++){
-            if (rightFile.get(i) != null){
-                val.approach += 1 * (1/(i+1));
-            }
-        }
-        return val;
-    }
-
-    private Values getUpValue(Gameboard gameboard){
-        Values val = new Values();
-        for (int i = 0; i < upFile.size(); i++){
-            if (upFile.get(i) != null){
-
-            }
-        }
-        return val;
-    }
-
-    private Values getDownValue(Gameboard gameboard) {
-        Values val = new Values();
-        for (int i = 0; i < downFile.size(); i++){
-            if (downFile.get(i) != null){
-                val.approach += 1 * (1/(i+1));
-            }
-        }
-        return val;
-    }
-
-    private void load(){
-        try{
-            FileInputStream fin = new FileInputStream(filepath);
-            ObjectInputStream ois = new ObjectInputStream(fin);
-            memory = (Memory) ois.readObject();
-            ois.close();
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    private void save(){
-        try {
-            FileOutputStream fout = new FileOutputStream(filepath);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(memory);
-            oos.close();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
     private static class Laser extends GameObjects {
@@ -436,30 +413,36 @@ public class PlayerAI extends ClientAI {
 
     }
 
-    public static class Values implements Serializable{
+    public static class Values implements Serializable {
         public double attack = 0;
         public double avoid = 0;
         public double approach = 0;
 
-        public Values(){
+        public Values() {
             approach = 0;
             avoid = 0;
             attack = 0;
         }
 
-        public double getAbsSum(){
+        public Values(double approach, double avoid, double attack) {
+            this.approach = approach;
+            this.avoid = avoid;
+            this.attack = attack;
+        }
+
+        public double getAbsSum() {
             return Math.abs(getSum());
         }
 
-        public double getAbsSum(double modifier){
+        public double getAbsSum(double modifier) {
             return Math.abs(getSum(modifier));
         }
 
         // This means something different now.
-        public double getSum(){
-            if (attack >= approach && attack >= avoid){
+        public double getSum() {
+            if (attack >= approach && attack >= avoid) {
                 return attack;
-            } else if (avoid > attack && avoid >= approach){
+            } else if (avoid > attack && avoid >= approach) {
                 return avoid;
             } else {
                 return approach;
@@ -467,20 +450,20 @@ public class PlayerAI extends ClientAI {
         }
 
         // This means something different now.
-        public double getSum(double modifier){
-            if (attack >= approach && attack >= avoid){
+        public double getSum(double modifier) {
+            if (attack >= approach && attack >= avoid) {
                 return attack + modifier;
-            } else if (avoid > attack && avoid >= approach){
+            } else if (avoid > attack && avoid >= approach) {
                 return avoid + modifier;
             } else {
                 return approach + modifier;
             }
         }
 
-        public int getAction(){
-            if (attack >= approach && attack >= avoid){
+        public int getAction() {
+            if (attack >= approach && attack >= avoid) {
                 return 1;
-            } else if (avoid > attack && avoid >= approach){
+            } else if (avoid > attack && avoid >= approach) {
                 return 2;
             } else {
                 return 3;
@@ -488,23 +471,31 @@ public class PlayerAI extends ClientAI {
         }
     }
 
-    public static class Memory implements Serializable{
+    public static class Memory implements Serializable {
         public Values Walls;
         public Values BulletAppr;
         public Values BulletAway;
         public Values BulletNeut;
+        public Values Laser;
         public Values TurretsIn;
         public Values TurretsOut;
         public Values Powerups;
+        public Values OppAppr;
+        public Values OppAway;
+        public Values OppNeut;
 
-        public Memory(){
-            Walls = new Values();
-            BulletAppr = new Values();
-            BulletAway = new Values();
-            BulletNeut = new Values();
-            TurretsIn = new Values();
-            TurretsOut = new Values();
-            Powerups = new Values();
+        public Memory() {
+            Walls = new Values(0, 1, 0);
+            BulletAppr = new Values(0, 4, 0);
+            BulletAway = new Values(3, 2, 0);
+            BulletNeut = new Values(2, 3, 0);
+            Laser = new Values(0, 5, 0);
+            TurretsIn = new Values(1, 5, 3);
+            TurretsOut = new Values(3, 2, 4);
+            Powerups = new Values(5, 0, 0);
+            OppAppr = new Values(1, 3, 5);
+            OppAway = new Values(3, 2, 5);
+            OppNeut = new Values(3, 1, 5);
         }
     }
 }
