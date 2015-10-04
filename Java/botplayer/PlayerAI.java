@@ -70,6 +70,19 @@ public class PlayerAI extends ClientAI {
             downModifier = 0.5;
         }
 
+        int centerX = gameboard.getWidth() / 2;
+        int centerY = gameboard.getHeight() / 2;
+        if (centerX > player.x){
+            rightModifier += 0.5;
+        } else if (centerX < player.x){
+            leftModifier += 0.5;
+        }
+        if (centerY > player.y){
+            downModifier += 0.5;
+        } else if (centerY < player.y){
+            upModifier += 0.5;
+        }
+
         System.out.println("left: " + leftVal.getAbsSum(leftModifier) + " right: " + rightVal.getAbsSum(rightModifier) + " up " +  upVal.getAbsSum(upModifier) + " down " + downVal.getAbsSum(downModifier));
         if (leftVal.getAbsSum(leftModifier) > rightVal.getAbsSum(rightModifier) && leftVal.getAbsSum(leftModifier) > upVal.getAbsSum(upModifier) && leftVal.getAbsSum(leftModifier) > downVal.getAbsSum(downModifier)) {
             val = leftVal;
@@ -85,9 +98,123 @@ public class PlayerAI extends ClientAI {
             direction = 3;
         }
 
+        if (val.getAction() == 2){
+            switch (curr_direction){
+                case 1:
+                    switch (direction){
+                        case 1:
+                            return Move.FACE_DOWN;
+                        case 2:
+                            if (upFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_DOWN;
+                            }
+                        case 3:
+                            if (upFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                if (leftFile.size() > rightFile.size()){
+                                    return Move.FACE_LEFT;
+                                } else {
+                                    return Move.FACE_RIGHT;
+                                } // else you're kinda fucked.
+                            }
+                        case 4:
+                            if (upFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_DOWN;
+                            }
+                    }
+                    break;
+                case 2:
+                    switch (direction){
+                        case 1:
+                            if (rightFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_LEFT;
+                            }
+                        case 2:
+                            return Move.FACE_LEFT;
+                        case 3:
+                            if (rightFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_LEFT;
+                            }
+                        case 4:
+                            if (rightFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                if (upFile.size() > downFile.size()){
+                                    return Move.FACE_UP;
+                                } else {
+                                    return Move.FACE_DOWN;
+                                } // else you're kinda fucked.
+                            }
+                    }
+                    break;
+                case 3:
+                    switch (direction){
+                        case 1:
+                            if (downFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                if (leftFile.size() > rightFile.size()){
+                                    return Move.FACE_LEFT;
+                                } else {
+                                    return Move.FACE_RIGHT;
+                                } // else you're kinda fucked.
+                            }
+                        case 2:
+                            if (downFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_UP;
+                            }
+                        case 3:
+                            return Move.FACE_UP;
+                        case 4:
+                            if (downFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_UP;
+                            }
+                    }
+                    break;
+                case 4:
+                    switch (direction){
+                        case 1:
+                            if (leftFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_RIGHT;
+                            }
+                        case 2:
+                            if (leftFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                if (upFile.size() > downFile.size()){
+                                    return Move.FACE_UP;
+                                } else {
+                                    return Move.FACE_DOWN;
+                                } // else you're kinda fucked.
+                            }
 
-
-        if (curr_direction == direction) {
+                        case 3:
+                            if (leftFile.size() > 1){
+                                return Move.FORWARD;
+                            } else {
+                                return Move.FACE_RIGHT;
+                            }
+                        case 4:
+                            return Move.FACE_RIGHT;
+                    }
+                    break;
+            }
+        } else if (curr_direction == direction) {
             switch (val.getAction()) {
                 case 1:
                     return Move.SHOOT;
@@ -381,7 +508,7 @@ public class PlayerAI extends ClientAI {
                     attack += memory.Laser.attack;
                     avoid += memory.Laser.avoid;
                 } else if (go instanceof Turret) {
-                    if (Math.abs(((Turret) go).getX() - player.getX()) < 5 || Math.abs(((Turret) go).getY() - player.getY()) < 5) {
+                    if (i < 5) {
                         System.out.println("Turrets In");
                         approach += memory.TurretsIn.approach;
                         attack += memory.TurretsIn.attack;
@@ -517,13 +644,13 @@ public class PlayerAI extends ClientAI {
             BulletAway = new Values(3, 2, 0);
             BulletNeut = new Values(2, 3, 0);
             Laser = new Values(0, 5, 0);
-            TurretsIn = new Values(1, 5, 3);
+            TurretsIn = new Values(0, 5, 2);
             TurretsOut = new Values(3, 2, 4);
             Powerups = new Values(5, 0, 0);
             OppAppr = new Values(1, 3, 5);
             OppAway = new Values(3, 2, 5);
             OppNeut = new Values(3, 1, 5);
-            space = new Values(0.5, 0, 0);
+            space = new Values(0.25, 0, 0);
         }
     }
 }
